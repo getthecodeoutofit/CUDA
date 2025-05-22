@@ -43,11 +43,32 @@ def initialize_cuda(device_id: int = 0):
 
     try:
         if _cuda_context is None:
+            # Check if CUDA is available and get available devices
+            if not cuda.is_available():
+                print("CUDA is not available on this system. Running in CPU-only mode.")
+                _cuda_enabled = False
+                return
+
+            # Get list of available devices
+            available_devices = cuda.list_devices()
+            num_devices = len(available_devices)
+
+            # Validate the requested device ID
+            if device_id >= num_devices or device_id < 0:
+                print(f"Invalid CUDA device ID: {device_id}")
+                print(f"Available devices: {num_devices} (IDs: 0-{num_devices-1})")
+                for i, device in enumerate(available_devices):
+                    print(f"  Device {i}: {device}")
+                print("Running in CPU-only mode.")
+                _cuda_enabled = False
+                return
+
+            # Select and initialize the device
             cuda.select_device(device_id)
             _cuda_device = cuda.get_current_device()
-            _cuda_context = _cuda_device.get_context()
+            _cuda_context = True  # Just mark that CUDA is initialized
             _cuda_enabled = True
-            print(f"CUDA initialized on device {device_id}: {_cuda_device.name}")
+            print(f"CUDA initialized on device {device_id}: {_cuda_device.name.decode()}")
     except Exception as e:
         print(f"Failed to initialize CUDA: {str(e)}")
         print("Running in CPU-only mode.")
@@ -60,13 +81,13 @@ def shutdown_cuda():
     """
     global _cuda_context, _cuda_device, _cuda_enabled
 
-    if _cuda_enabled and _cuda_context is not None:
+    if _cuda_enabled:
         _cuda_context = None
         _cuda_device = None
         _cuda_enabled = False
         # No need to explicitly close in newer Numba versions
         print("CUDA resources released")
-    elif not _cuda_enabled:
+    else:
         print("No CUDA resources to release (CPU-only mode)")
 
 
