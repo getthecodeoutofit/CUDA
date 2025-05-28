@@ -120,10 +120,4 @@ python -m unittest discover tests
 - Some optimizations may change the behavior of the code if it relies on side effects
 - The optimizer does not handle all Python language features
 
-## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
