@@ -1,24 +1,13 @@
 #!/usr/bin/env python3
 """
-Python Code Optimizer Tool
-
-This tool optimizes Python code using various compiler optimization techniques
-and leverages CUDA/GPU for the optimization process itself.
-
-Usage:
-    python main.py [options] input_file [output_file]
 
 Options:
-    -h, --help                      Show this help message and exit
-    -v, --verbose                   Enable verbose output
     --no-constant-folding           Disable constant folding optimization
     --no-dead-code-elimination      Disable dead code elimination
     --no-loop-unrolling             Disable loop unrolling
     --no-common-subexpr-elimination Disable common subexpression elimination
     --no-function-inlining          Disable function inlining
     --no-strength-reduction         Disable strength reduction
-    --cuda-device DEVICE_ID         CUDA device ID to use (default: 0)
-    --benchmark                     Run benchmark on the optimization process
 """
 
 import argparse

@@ -27,8 +27,8 @@ This project implements a Python code optimizer that mimics the optimization pha
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/python-code-optimizer.git
-   cd python-code-optimizer
+   git clone https://github.com/getthecodeoutofit/CUDA.git
+   cd CUDA
    ```
 
 2. Install the required packages:
