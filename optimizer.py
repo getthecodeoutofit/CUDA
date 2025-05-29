@@ -25,12 +25,7 @@ from optimization_techniques import (
 
 
 class Optimizer:
-    """
-    Main optimizer class that applies various optimization techniques to Python code.
-    
-    This optimizer leverages CUDA/GPU for accelerating the optimization process itself.
-    """
-    
+
     def __init__(self, 
                  enable_constant_folding: bool = True,
                  enable_dead_code_elimination: bool = True,
@@ -40,19 +35,6 @@ class Optimizer:
                  enable_strength_reduction: bool = True,
                  cuda_device: int = 0,
                  verbose: bool = False):
-        """
-        Initialize the optimizer with the specified optimization techniques.
-        
-        Args:
-            enable_constant_folding: Whether to enable constant folding optimization
-            enable_dead_code_elimination: Whether to enable dead code elimination
-            enable_loop_unrolling: Whether to enable loop unrolling
-            enable_common_subexpression_elimination: Whether to enable common subexpression elimination
-            enable_function_inlining: Whether to enable function inlining
-            enable_strength_reduction: Whether to enable strength reduction
-            cuda_device: CUDA device ID to use
-            verbose: Whether to print verbose output
-        """
         self.enable_constant_folding = enable_constant_folding
         self.enable_dead_code_elimination = enable_dead_code_elimination
         self.enable_loop_unrolling = enable_loop_unrolling
@@ -81,15 +63,7 @@ class Optimizer:
         shutdown_cuda()
     
     def optimize(self, code: str) -> Tuple[str, Dict]:
-        """
-        Optimize the given Python code using the enabled optimization techniques.
-        
-        Args:
-            code: Python code to optimize
-            
-        Returns:
-            Tuple of (optimized_code, optimization_stats)
-        """
+
         start_time = time.time()
         
         # Parse the code into an AST
@@ -154,17 +128,8 @@ class Optimizer:
         
         return optimized_code, self.optimization_stats
     
+    
     def optimize_file(self, input_file: str, output_file: Optional[str] = None) -> Dict:
-        """
-        Optimize Python code from a file and optionally write the optimized code to another file.
-        
-        Args:
-            input_file: Path to the input Python file
-            output_file: Path to the output Python file (if None, will use input_file + '.optimized.py')
-            
-        Returns:
-            Optimization statistics
-        """
         if self.verbose:
             print(f"Optimizing file: {input_file}")
         

@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-
-Options:
-    --no-constant-folding           Disable constant folding optimization
-    --no-dead-code-elimination      Disable dead code elimination
-    --no-loop-unrolling             Disable loop unrolling
-    --no-common-subexpr-elimination Disable common subexpression elimination
-    --no-function-inlining          Disable function inlining
-    --no-strength-reduction         Disable strength reduction
-"""
 
 import argparse
 import os
@@ -20,23 +9,25 @@ from optimizer import Optimizer
 
 
 def parse_args():
-    """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Python Code Optimizer Tool")
     
     parser.add_argument("input_file", help="Input Python file to optimize")
+    
     parser.add_argument("output_file", nargs="?", help="Output file for optimized code (default: input_file.optimized.py)")
-    
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    
+
     parser.add_argument("--no-constant-folding", action="store_true", help="Disable constant folding optimization")
+    
     parser.add_argument("--no-dead-code-elimination", action="store_true", help="Disable dead code elimination")
+    
     parser.add_argument("--no-loop-unrolling", action="store_true", help="Disable loop unrolling")
+    
     parser.add_argument("--no-common-subexpr-elimination", action="store_true", help="Disable common subexpression elimination")
+    
     parser.add_argument("--no-function-inlining", action="store_true", help="Disable function inlining")
+    
     parser.add_argument("--no-strength-reduction", action="store_true", help="Disable strength reduction")
     
     parser.add_argument("--cuda-device", type=int, default=0, help="CUDA device ID to use (default: 0)")
-    parser.add_argument("--benchmark", action="store_true", help="Run benchmark on the optimization process")
     
     return parser.parse_args()
 
@@ -59,32 +50,27 @@ def print_optimization_stats(stats: Dict):
         print(f"Loops unrolled: {stats['unrolled_loops']}")
 
 
-def run_benchmark(optimizer: Optimizer, input_file: str):
-    """Run a benchmark on the optimization process."""
-    print("\nRunning benchmark...")
+# def run_benchmark(optimizer: Optimizer, input_file: str):
+#     print("\nRunning benchmark...")
     
-    with open(input_file, 'r') as f:
-        code = f.read()
+#     with open(input_file, 'r') as f:
+#         code = f.read()
+#     optimizer.optimize(code)
+#     num_runs = 5
+#     total_time = 0
     
-    # Warm-up run
-    optimizer.optimize(code)
-    
-    # Benchmark runs
-    num_runs = 5
-    total_time = 0
-    
-    for i in range(num_runs):
-        start_time = time.time()
-        optimizer.optimize(code)
-        end_time = time.time()
+#     for i in range(num_runs):
+#         start_time = time.time()
+#         optimizer.optimize(code)
+#         end_time = time.time()
         
-        run_time = end_time - start_time
-        total_time += run_time
+#         run_time = end_time - start_time
+#         total_time += run_time
         
-        print(f"Run {i+1}: {run_time:.4f} seconds")
+#         print(f"Run {i+1}: {run_time:.4f} seconds")
     
-    avg_time = total_time / num_runs
-    print(f"\nAverage execution time over {num_runs} runs: {avg_time:.4f} seconds")
+#     avg_time = total_time / num_runs
+#     print(f"\nAverage execution time over {num_runs} runs: {avg_time:.4f} seconds")
 
 
 def main():
@@ -95,7 +81,6 @@ def main():
         print(f"Error: Input file '{args.input_file}' does not exist")
         sys.exit(1)
     
-    # Create optimizer with specified options
     optimizer = Optimizer(
         enable_constant_folding=not args.no_constant_folding,
         enable_dead_code_elimination=not args.no_dead_code_elimination,
@@ -107,18 +92,13 @@ def main():
         verbose=args.verbose
     )
     
-    # Run benchmark if requested
-    if args.benchmark:
-        run_benchmark(optimizer, args.input_file)
-        sys.exit(0)
+    # if args.benchmark:
+    #     run_benchmark(optimizer, args.input_file)
+    #     sys.exit(0)
     
-    # Optimize the input file
     output_file = args.output_file
     stats = optimizer.optimize_file(args.input_file, output_file)
-    
-    # Print optimization statistics
     print_optimization_stats(stats)
-    
     print(f"\nOptimized code written to: {output_file or args.input_file + '.optimized.py'}")
 
 

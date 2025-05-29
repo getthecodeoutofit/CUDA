@@ -1,9 +1,3 @@
-"""
-Implementation of different optimization techniques.
-
-This module contains classes for various code optimization techniques
-that can be applied to Python AST.
-"""
 
 import ast
 import copy
@@ -17,45 +11,23 @@ from cuda_kernels import parallel_pattern_match, parallel_constant_folding, para
 
 
 class OptimizationTechnique:
-    """Base class for all optimization techniques."""
 
     def __init__(self):
         self.stats = {}
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply the optimization technique to the AST.
 
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
         raise NotImplementedError("Subclasses must implement this method")
 
 
 class ConstantFolder(OptimizationTechnique):
-    """
-    Constant folding optimization.
 
-    This optimization evaluates constant expressions at compile time.
-    """
 
     def __init__(self):
         super().__init__()
         self.folded_expressions = 0
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply constant folding to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
         # First pass: collect all constant expressions
         visitor = ConstantFoldingVisitor()
         visitor.visit(tree)
@@ -126,7 +98,6 @@ class ConstantFolder(OptimizationTechnique):
 
 
 class ConstantFoldingVisitor(ASTVisitor):
-    """Visitor to collect constant expressions for folding."""
 
     def __init__(self):
         super().__init__()
@@ -189,31 +160,16 @@ class ConstantFoldingTransformer(ASTTransformer):
 
 
 class DeadCodeEliminator(OptimizationTechnique):
-    """
-    Dead code elimination optimization.
-
-    This optimization removes code that doesn't affect the program output.
-    """
 
     def __init__(self):
         super().__init__()
         self.eliminated_statements = 0
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply dead code elimination to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
         # First pass: collect variable uses and definitions
         visitor = DeadCodeVisitor()
         visitor.visit(tree)
 
-        # Use CUDA to analyze dead code in parallel
         var_uses = [0] * len(visitor.variables)
         var_defs = [0] * len(visitor.variables)
 
@@ -227,17 +183,15 @@ class DeadCodeEliminator(OptimizationTechnique):
             if var in var_to_idx:
                 var_defs[var_to_idx[var]] = 1
 
-        # Analyze dead code using CUDA
+
         dead_vars_result = parallel_dead_code_analysis(var_uses, var_defs)
 
-        # Convert results back to variable names
         dead_variables = set()
         for i, is_dead in enumerate(dead_vars_result):
             if is_dead == 1:
                 var = list(visitor.variables)[i]
                 dead_variables.add(var)
 
-        # Second pass: remove dead code
         transformer = DeadCodeTransformer(dead_variables, visitor.used_variables)
         new_tree = transformer.visit(tree)
 
@@ -251,7 +205,7 @@ class DeadCodeEliminator(OptimizationTechnique):
 
 
 class DeadCodeVisitor(ASTVisitor):
-    """Visitor to collect information for dead code elimination."""
+
 
     def __init__(self):
         super().__init__()
@@ -261,7 +215,7 @@ class DeadCodeVisitor(ASTVisitor):
         self.unreachable_code = []
 
     def visit_Name(self, node):
-        """Record variable uses and definitions."""
+
         self.variables.add(node.id)
 
         if isinstance(node.ctx, ast.Load):
@@ -272,29 +226,28 @@ class DeadCodeVisitor(ASTVisitor):
         self.generic_visit(node)
 
     def visit_If(self, node):
-        """Identify unreachable code in if statements."""
+
         if isinstance(node.test, ast.Constant):
             if node.test.value:
-                # The else branch is unreachable
+
                 if node.orelse:
                     self.unreachable_code.append(('else', node))
             else:
-                # The if branch is unreachable
+
                 self.unreachable_code.append(('if', node))
 
         self.generic_visit(node)
 
     def visit_While(self, node):
-        """Identify unreachable code in while loops."""
+
         if isinstance(node.test, ast.Constant) and not node.test.value:
-            # The loop body is unreachable
+
             self.unreachable_code.append(('while', node))
 
         self.generic_visit(node)
 
 
 class DeadCodeTransformer(ASTTransformer):
-    """Transformer to remove dead code."""
 
     def __init__(self, dead_variables, used_variables):
         super().__init__()
@@ -303,10 +256,10 @@ class DeadCodeTransformer(ASTTransformer):
         self.eliminated_statements = 0
 
     def visit_Assign(self, node):
-        """Remove assignments to dead variables."""
+
         node = self.generic_visit(node)
 
-        # Check if all targets are dead variables
+
         all_dead = True
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id not in self.dead_variables:
@@ -320,7 +273,6 @@ class DeadCodeTransformer(ASTTransformer):
         return node
 
     def visit_If(self, node):
-        """Remove unreachable branches in if statements."""
         node = self.generic_visit(node)
 
         if isinstance(node.test, ast.Constant):
@@ -330,32 +282,21 @@ class DeadCodeTransformer(ASTTransformer):
                     self.eliminated_statements += len(node.orelse)
                     node.orelse = []
             else:
-                # The if branch is unreachable
                 self.eliminated_statements += len(node.body)
-                # Replace with the else branch
                 return ast.Module(body=node.orelse, type_ignores=[]) if isinstance(node, ast.Module) else node.orelse
 
         return node
 
     def visit_While(self, node):
-        """Remove unreachable while loops."""
         node = self.generic_visit(node)
 
         if isinstance(node.test, ast.Constant) and not node.test.value:
-            # The loop body is unreachable
             self.eliminated_statements += len(node.body)
             return None
 
         return node
 
-
-# Add more optimization techniques (LoopUnroller, CommonSubexpressionEliminator, etc.)
 class LoopUnroller(OptimizationTechnique):
-    """
-    Loop unrolling optimization.
-
-    This optimization reduces loop overhead by duplicating the loop body.
-    """
 
     def __init__(self, unroll_factor=4, max_iterations=16):
         super().__init__()
@@ -364,15 +305,6 @@ class LoopUnroller(OptimizationTechnique):
         self.unrolled_loops = 0
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply loop unrolling to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
         transformer = LoopUnrollingTransformer(self.unroll_factor, self.max_iterations)
         new_tree = transformer.visit(tree)
 
@@ -385,7 +317,6 @@ class LoopUnroller(OptimizationTechnique):
 
 
 class LoopUnrollingTransformer(ASTTransformer):
-    """Transformer to unroll loops."""
 
     def __init__(self, unroll_factor, max_iterations):
         super().__init__()
@@ -393,80 +324,31 @@ class LoopUnrollingTransformer(ASTTransformer):
         self.max_iterations = max_iterations
         self.unrolled_loops = 0
 
-    # Implementation of loop unrolling will go here
-
 
 class CommonSubexpressionEliminator(OptimizationTechnique):
-    """
-    Common subexpression elimination optimization.
-
-    This optimization avoids redundant computations by reusing previously computed values.
-    """
-
     def __init__(self):
         super().__init__()
         self.eliminated_expressions = 0
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply common subexpression elimination to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
-        # Implementation will go here
         return tree
 
 
 class FunctionInliner(OptimizationTechnique):
-    """
-    Function inlining optimization.
-
-    This optimization replaces function calls with the function body.
-    """
 
     def __init__(self, max_inline_size=20):
         super().__init__()
         self.max_inline_size = max_inline_size
         self.inlined_functions = 0
 
-    def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply function inlining to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
-        # Implementation will go here
+    def optimize(self, tree: ast.AST) -> ast.AST: #accespts the AST
         return tree
 
 
 class StrengthReducer(OptimizationTechnique):
-    """
-    Strength reduction optimization.
-
-    This optimization replaces expensive operations with cheaper ones.
-    """
-
     def __init__(self):
         super().__init__()
         self.reduced_operations = 0
 
     def optimize(self, tree: ast.AST) -> ast.AST:
-        """
-        Apply strength reduction to the AST.
-
-        Args:
-            tree: The AST to optimize
-
-        Returns:
-            The optimized AST
-        """
-        # Implementation will go here
         return tree

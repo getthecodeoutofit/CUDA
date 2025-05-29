@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import ast
-import pickle
 import warnings
 from typing import Dict, List, Optional, Set, Tuple, Union, Callable
 
@@ -220,8 +219,6 @@ if CUDA_AVAILABLE:
         var_idx = cuda.grid(1)
         if var_idx >= len(var_defs):
             return
-
-        # A variable definition is dead if the variable is never used
         if var_uses[var_idx] == 0 and var_defs[var_idx] == 1:
             results[var_idx] = 1
         else:

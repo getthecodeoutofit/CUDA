@@ -66,22 +66,6 @@ Options:
   --benchmark                     Run benchmark on the optimization process
 ```
 
-### Examples
-
-Optimize a Python file with all optimizations enabled:
-```
-python main.py examples/example1.py
-```
-
-Optimize a Python file with specific optimizations disabled:
-```
-python main.py --no-loop-unrolling --no-function-inlining examples/example2.py
-```
-
-Run a benchmark on the optimization process:
-```
-python main.py --benchmark examples/example1.py
-```
 
 ## Project Structure
 
@@ -106,13 +90,6 @@ The optimizer uses CUDA for:
 - Parallel evaluation of constant expressions
 - Parallel analysis of variable uses and definitions for dead code elimination
 - Other parallel operations in the optimization process
-
-## Running Tests
-
-To run the tests:
-```
-python -m unittest discover tests
-```
 
 ## Limitations
 
