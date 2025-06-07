@@ -1,20 +1,10 @@
-"""
-Utilities for working with Python's Abstract Syntax Tree (AST).
-
-This module provides helper classes for visiting and transforming AST nodes.
-"""
 
 import ast
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, Callable
 
 
 class ASTVisitor(ast.NodeVisitor):
-    """
-    Extended AST visitor with additional utilities for code analysis.
-    
-    This class provides methods for collecting information about the AST
-    that can be used for optimization decisions.
-    """
+
     
     def __init__(self):
         self.variables = set()
@@ -172,15 +162,7 @@ def get_node_source(node, source_code):
 
 
 def is_constant_expression(node):
-    """
-    Check if an AST node represents a constant expression.
-    
-    Args:
-        node: The AST node to check
-        
-    Returns:
-        True if the node is a constant expression, False otherwise
-    """
+
     if isinstance(node, ast.Constant):
         return True
     

@@ -89,7 +89,7 @@ def main():
         enable_function_inlining=not args.no_function_inlining,
         enable_strength_reduction=not args.no_strength_reduction,
         cuda_device=args.cuda_device,
-        verbose=args.verbose
+        # verbose=args.verbose
     )
     
     # if args.benchmark:
